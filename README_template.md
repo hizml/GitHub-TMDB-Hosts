@@ -25,6 +25,10 @@
 **适用工具**: TinyMediaManager、Plex、Emby、Jellyfin、Kodi、群晖 Video Station、Infuse、nPlayer 等
 
 ## 🚀 使用方法
+下面的地址无需访问 GitHub 即可获取到最新的 hosts 内容：
+
+- 文件：`https://github.com/hizml/GitHub-TMDB-Hosts/hosts`
+- JSON：`https://github.com/hizml/GitHub-TMDB-Hosts/hosts.json`
 
 ### 方式一：手动复制（最简单）
 
@@ -89,6 +93,54 @@ curl https://raw.githubusercontent.com/hizml/GitHub-TMDB-Hosts/main/hosts | sudo
 ```bash
 curl https://raw.githubusercontent.com/hizml/GitHub-TMDB-Hosts/main/hosts >> /c/Windows/System32/drivers/etc/hosts
 ```
+
+在**CMD**中执行以下命令，执行前需要替换**git-bash.exe**和**fetch_github_hosts**为你本地的路径，注意前者为windows路径格式后者为shell路径格式
+
+`"C:\Program Files\Git\git-bash.exe" -c "/c/Users/XXX/fetch_github_hosts"`
+
+可以将上述命令添加到windows的task schedular（任务计划程序）中以定时执行
+
+#### GNU（Ubuntu/CentOS/Fedora）
+
+`sudo sh -c 'sed -i "/# GitHub520 Host Start/Q" /etc/hosts && curl https://raw.hellogithub.com/hosts >> /etc/hosts'`
+
+#### BSD/macOS
+
+`sudo sed -i "" "/# GitHub520 Host Start/,/# Github520 Host End/d" /etc/hosts && curl https://raw.hellogithub.com/hosts | sudo tee -a /etc/hosts`
+
+将上面的命令添加到 cron，可定时执行。使用前确保 GitHub520 内容在该文件最后部分。
+
+**在 Docker 中运行，若遇到 `Device or resource busy` 错误，可使用以下命令执行**
+
+`cp /etc/hosts ~/hosts.new && sed -i "/# GitHub520 Host Start/Q" ~/hosts.new && curl https://raw.hellogithub.com/hosts >> ~/hosts.new && cp -f ~/hosts.new /etc/hosts`
+
+### 2.4 AdGuard 用户（自动方式）
+
+在 **过滤器>DNS 封锁清单>添加阻止列表>添加一个自定义列表**，配置如下：
+
+- 名称：随意
+
+- URL：`https://raw.hellogithub.com/hosts`（和上面 SwitchHosts 使用的一样）
+
+如图：
+
+![](./img/AdGuard-rules.png)
+
+更新间隔在 **设置 > 常规设置 > 过滤器更新间隔（设置一小时一次即可）**，记得勾选上 **使用过滤器和 Hosts 文件以拦截指定域名**
+
+![](./img/AdGuard-rules2.png)
+
+**Tip**：不要添加在 **DNS 允许清单** 内，只能添加在 **DNS 封锁清单** 才管用。 另外，AdGuard for Mac、AdGuard for Windows、AdGuard for Android、AdGuard for IOS 等等 **AdGuard 家族软件** 添加方法均类似。
+
+
+## 三、效果对比
+之前的样子：
+
+![](./img/old.png)
+
+修改完 hosts 的样子：
+
+![](./img/new.png)
 
 ## 📦 支持的域名
 
