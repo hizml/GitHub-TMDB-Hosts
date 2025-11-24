@@ -63,12 +63,14 @@ def get_json(session: Any) -> Optional[list]:
         raise Exception
 
 
-def write_file(hosts_content: str, update_time: str) -> bool:
+def write_file(hosts_content: str, update_time: str, force_update: bool = False) -> bool:
     output_doc_file_path = os.path.join(os.path.dirname(__file__), "README.md")
     template_path = os.path.join(os.path.dirname(__file__),
                                  "README_template.md")
     write_host_file(hosts_content)
-    if os.path.exists(output_doc_file_path):
+    
+    # 如果不是强制更新,检查内容是否变化
+    if not force_update and os.path.exists(output_doc_file_path):
         with open(output_doc_file_path, "r") as old_readme_fb:
             old_content = old_readme_fb.read()
             if old_content:
@@ -101,14 +103,14 @@ def write_json_file(hosts_list: list) -> None:
         json.dump(hosts_list, output_fb)
 
 
-def write_hosts_content(content: str, content_list: list) -> str:
+def write_hosts_content(content: str, content_list: list, force_update: bool = False) -> str:
     if not content:
         return ""
     update_time = datetime.now(timezone.utc).astimezone(
         timezone(timedelta(hours=8))).replace(microsecond=0).isoformat()
     hosts_content = HOSTS_TEMPLATE.format(content=content,
                                           update_time=update_time)
-    has_change = write_file(hosts_content, update_time)
+    has_change = write_file(hosts_content, update_time, force_update=force_update)
     if has_change:
         write_json_file(content_list)
     return hosts_content

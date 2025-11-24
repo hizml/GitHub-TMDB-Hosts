@@ -8,6 +8,12 @@ on:
   schedule:
     - cron: '0 */2 * * *'
   workflow_dispatch:
+    inputs:
+      force_update:
+        description: '强制全量更新(忽略去重检查)'
+        required: false
+        default: 'true'
+        type: boolean
 
 jobs:
   build:
@@ -27,6 +33,8 @@ jobs:
       run: |
         if [ -f actions_requirements.txt ]; then pip install -r actions_requirements.txt; fi
     - name: run script
+      env:
+        FORCE_UPDATE: ${{ github.event.inputs.force_update || 'false' }}
       run: |
         # fetch new ip content and update readme file
         python update_ips.py
