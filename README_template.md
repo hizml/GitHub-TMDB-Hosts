@@ -114,7 +114,7 @@ curl https://raw.githubusercontent.com/hizml/GitHub-TMDB-Hosts/main/hosts >> /c/
 
 `cp /etc/hosts ~/hosts.new && sed -i "/# GitHub520 Host Start/Q" ~/hosts.new && curl https://raw.hellogithub.com/hosts >> ~/hosts.new && cp -f ~/hosts.new /etc/hosts`
 
-### 2.4 AdGuard 用户（自动方式）
+### 方式四：AdGuard 用户（自动方式）
 
 在 **过滤器>DNS 封锁清单>添加阻止列表>添加一个自定义列表**，配置如下：
 
