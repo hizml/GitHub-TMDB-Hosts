@@ -30,7 +30,15 @@ GITHUB_URLS = [
     'githubstatus.com', 'live.github.com', 'media.githubusercontent.com',
     'objects.githubusercontent.com', 'pipelines.actions.githubusercontent.com',
     'raw.githubusercontent.com', 'user-images.githubusercontent.com',
-    'vscode.dev', 'education.github.com', 'private-user-images.githubusercontent.com'
+    'vscode.dev', 'education.github.com', 'private-user-images.githubusercontent.com',
+    # TMDB & IMDb & TheTVDB domains
+    'tmdb.org', 'api.tmdb.org', 'files.tmdb.org',
+    'themoviedb.org', 'api.themoviedb.org', 'www.themoviedb.org', 'auth.themoviedb.org',
+    'image.tmdb.org', 'images.tmdb.org',
+    'imdb.com', 'www.imdb.com', 'secure.imdb.com', 's.media-imdb.com',
+    'us.dd.imdb.com', 'www.imdb.to', 'origin-www.imdb.com', 'ia.media-imdb.com',
+    'imdb-video.media-imdb.com', 'f.media-amazon.com',
+    'thetvdb.com', 'api.thetvdb.com'
 ]
 
 HOSTS_TEMPLATE = """# GitHub520 Host Start
@@ -38,7 +46,8 @@ HOSTS_TEMPLATE = """# GitHub520 Host Start
 
 # Update time: {update_time}
 # Update url: https://raw.hellogithub.com/hosts
-# Star me: https://github.com/521xueweihan/GitHub520
+# Star me: https://github.com/hizml/GitHub520
+# Star original: https://github.com/521xueweihan/GitHub520
 # GitHub520 Host End\n"""
 
 
