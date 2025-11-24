@@ -27,8 +27,8 @@
 ## 🚀 使用方法
 下面的地址无需访问 GitHub 即可获取到最新的 hosts 内容：
 
-- 文件：`https://github.com/hizml/GitHub-TMDB-Hosts/hosts`
-- JSON：`https://github.com/hizml/GitHub-TMDB-Hosts/hosts.json`
+- 文件：`https://raw.githubusercontent.com/hizml/GitHub-TMDB-Hosts/main/hosts`
+- JSON：`https://raw.githubusercontent.com/hizml/GitHub-TMDB-Hosts/main/hosts.json`
 
 ### 方式一：手动复制（最简单）
 
