@@ -27,8 +27,8 @@
 ## 🚀 使用方法
 下面的地址无需访问 GitHub 即可获取到最新的 hosts 内容：
 
-- 文件：`https://github.com/hizml/GitHub-TMDB-Hosts/hosts`
-- JSON：`https://github.com/hizml/GitHub-TMDB-Hosts/hosts.json`
+- 文件：`https://raw.githubusercontent.com/hizml/GitHub-TMDB-Hosts/main/hosts`
+- JSON：`https://raw.githubusercontent.com/hizml/GitHub-TMDB-Hosts/main/hosts.json`
 
 ### 方式一：手动复制（最简单）
 
@@ -78,7 +78,7 @@
 185.199.109.133               private-user-images.githubusercontent.com
 
 
-# Update time: 2025-11-24T18:58:30+08:00
+# Update time: 2025-11-24T20:48:39+08:00
 # Update url: https://raw.githubusercontent.com/hizml/GitHub-TMDB-Hosts/main/hosts
 # Star me: https://github.com/hizml/GitHub-TMDB-Hosts
 # Star original: https://github.com/521xueweihan/GitHub520
@@ -86,7 +86,7 @@
 
 ```
 
-该内容会自动定时更新，数据更新时间：2025-11-24T18:58:30+08:00
+该内容会自动定时更新，数据更新时间：2025-11-24T20:48:39+08:00
 
 #### 2. 修改 hosts 文件
 
@@ -162,7 +162,7 @@ curl https://raw.githubusercontent.com/hizml/GitHub-TMDB-Hosts/main/hosts >> /c/
 
 `cp /etc/hosts ~/hosts.new && sed -i "/# GitHub520 Host Start/Q" ~/hosts.new && curl https://raw.hellogithub.com/hosts >> ~/hosts.new && cp -f ~/hosts.new /etc/hosts`
 
-### 2.4 AdGuard 用户（自动方式）
+### 方式四：AdGuard 用户（自动方式）
 
 在 **过滤器>DNS 封锁清单>添加阻止列表>添加一个自定义列表**，配置如下：
 
