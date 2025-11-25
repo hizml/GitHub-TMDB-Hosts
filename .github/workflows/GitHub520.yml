@@ -1,11 +1,12 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: GitHub520
+name: Quick Update
 
 on:
   push:
   schedule:
+    # 每 2 小时运行一次快速更新
     - cron: '0 */2 * * *'
   workflow_dispatch:
     inputs:
@@ -44,7 +45,7 @@ jobs:
         git config --global user.email action@github.com
         git config --global user.name action_bot
         git add .
-        git commit -m "update readme content"
+        git commit -m "Quick update - refresh timestamp"
       continue-on-error: true
     - name: Check on failures
       if: steps.commit.outputs.status == 'failure'

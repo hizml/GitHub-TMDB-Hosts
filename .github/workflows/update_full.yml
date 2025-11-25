@@ -1,0 +1,54 @@
+# 完整 IP 更新工作流 - 每天运行一次 fetch_ips.py
+name: Full IP Update
+
+on:
+  schedule:
+    # 每天凌晨 2 点运行(UTC 时间 18:00 = 北京时间次日 02:00)
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+    inputs:
+      force_update:
+        description: '强制更新(即使内容未变化)'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  full-update:
+    runs-on: ubuntu-24.04
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    
+    - name: Install full dependencies
+      run: |
+        pip install -r requirements.txt
+    
+    - name: Run fetch_ips.py to get optimized IPs
+      env:
+        FORCE_UPDATE: ${{ github.event.inputs.force_update || 'false' }}
+      run: |
+        echo "开始完整 IP 获取和 Ping 测试..."
+        echo "FORCE_UPDATE=$FORCE_UPDATE"
+        python fetch_ips.py
+        echo "完成!"
+    
+    - name: Commit changes
+      id: commit
+      run: |
+        git config --global user.email action@github.com
+        git config --global user.name action_bot
+        git add hosts hosts.json README.md
+        git diff --staged --quiet || git commit -m "Daily full IP update with ping optimization"
+      continue-on-error: true
+    
+    - name: Push changes
+      if: steps.commit.outcome == 'success'
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}

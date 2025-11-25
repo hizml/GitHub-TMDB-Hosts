@@ -5,6 +5,7 @@
 #   E-mail  :   595666367@qq.com
 #   Date    :   2020-05-19 15:27
 #   Desc    :   获取最新的 GitHub 相关域名对应 IP
+import os
 import re
 from typing import Any, Dict, List, Optional
 from datetime import datetime
@@ -128,6 +129,12 @@ async def get_ip(session: Any, github_url: str) -> Optional[str]:
 async def main() -> None:
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print(f'{current_time} - Start script.')
+    
+    # 从环境变量读取 force_update 参数
+    force_update = os.getenv('FORCE_UPDATE', 'false').lower() == 'true'
+    if force_update:
+        print('Force update mode enabled - will update even if content unchanged')
+    
     session = HTMLSession()
     content = ""
     content_list = []
@@ -147,7 +154,7 @@ async def main() -> None:
         except Exception:
             continue
 
-    write_hosts_content(content, content_list)
+    write_hosts_content(content, content_list, force_update=force_update)
     # print(hosts_content)
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print(f'{current_time} - End script.')
