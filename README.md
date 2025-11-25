@@ -99,7 +99,7 @@
 104.244.46.185                api.thetvdb.com
 
 
-# Update time: 2025-11-25T13:12:51+08:00
+# Update time: 2025-11-25T14:32:27+08:00
 # Update url: https://raw.githubusercontent.com/hizml/GitHub-TMDB-Hosts/main/hosts
 # Star me: https://github.com/hizml/GitHub-TMDB-Hosts
 # Star original: https://github.com/521xueweihan/GitHub520
@@ -107,7 +107,7 @@
 
 ```
 
-该内容会自动定时更新，数据更新时间：2025-11-25T13:12:51+08:00
+该内容会自动定时更新，数据更新时间：2025-11-25T14:32:27+08:00
 
 #### 2. 修改 hosts 文件
 
@@ -243,6 +243,6 @@ thetvdb.com, api.thetvdb.com
 
 感谢 [@521xueweihan](https://github.com/521xueweihan) 创建的优秀项目 [GitHub520](https://github.com/521xueweihan/GitHub520)
 
-## 📄 许可证
+## ⚠️ 免责声明
 
-<a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh"><img alt="知识共享许可协议" style="border-width: 0" src="https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png"></a><br>本作品采用 <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.zh">署名-非商业性使用-禁止演绎 4.0 国际</a> 进行许可。
+本项目仅供学习和研究使用，请遵守相关法律法规。使用本项目产生的任何后果由使用者自行承担。
