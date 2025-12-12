@@ -10,8 +10,6 @@ import json
 from typing import Any, Optional
 from datetime import datetime, timezone, timedelta
 
-from retry import retry
-
 GITHUB_URLS = [
     'alive.github.com', 'api.github.com', 'api.individual.githubcopilot.com',
     'avatars.githubusercontent.com', 'avatars0.githubusercontent.com',
@@ -51,16 +49,22 @@ HOSTS_TEMPLATE = """# GitHub-TMDB-Hosts Start
 # GitHub-TMDB-Hosts End\n"""
 
 
-@retry(tries=3)
 def get_json(session: Any) -> Optional[list]:
+    """从远程 API 获取 hosts 数据（带重试机制）"""
     url = 'https://raw.githubusercontent.com/hizml/GitHub-TMDB-Hosts/main/hosts.json'
-    try:
-        rs = session.get(url)
-        data = json.loads(rs.text)
-        return data
-    except Exception as ex:
-        print(f"get: {url}, error: {ex}")
-        raise Exception
+    max_retries = 3
+    
+    for attempt in range(1, max_retries + 1):
+        try:
+            rs = session.get(url, timeout=10)
+            rs.raise_for_status()  # 检查 HTTP 状态码
+            data = json.loads(rs.text)
+            return data
+        except Exception as ex:
+            print(f"get: {url}, attempt {attempt}/{max_retries}, error: {ex}")
+            if attempt == max_retries:
+                raise Exception(f"Failed to fetch JSON after {max_retries} attempts")
+    return None
 
 
 def write_file(hosts_content: str, update_time: str, force_update: bool = False) -> bool:

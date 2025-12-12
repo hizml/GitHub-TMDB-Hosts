@@ -128,6 +128,7 @@ timezone(timedelta(hours=8))
 ## 代码约定
 
 - 所有 Python 文件使用 UTF-8 编码
+- 重试机制: `common.py:get_json()` 手动实现 3 次重试逻辑
 - 异步 IO: 使用 asyncio 实现并发执行
 - 类型提示: 使用 typing 模块标注返回类型
 - 依赖最小化: 仅依赖 requests-html、pythonping、lxml_html_clean
