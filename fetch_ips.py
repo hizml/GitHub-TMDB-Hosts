@@ -48,7 +48,7 @@ def select_ip_from_list(ip_list: List[str]) -> Optional[str]:
     return best_ip
 
 
-@retry(tries=3)
+@retry(tries=2)
 def get_ip_list_from_ipaddress_com(session: Any, github_url: str) -> Optional[List[str]]:
     url = f'https://sites.ipaddress.com/{github_url}'
     headers = {
@@ -56,12 +56,21 @@ def get_ip_list_from_ipaddress_com(session: Any, github_url: str) -> Optional[Li
                       ' AppleWebKit/537.36 (KHTML, like Gecko) Chrome/1'
                       '06.0.0.0 Safari/537.36'}
     try:
-        rs = session.get(url, headers=headers, timeout=5)
+        rs = session.get(url, headers=headers, timeout=10)
+        if rs.status_code != 200:
+            print(f"{url} - HTTP {rs.status_code}")
+            return []
         pattern = r"\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b"
         ip_list = re.findall(pattern, rs.html.text)
-        return ip_list
+        # 过滤掉明显错误的 IP
+        valid_ips = []
+        for ip in ip_list:
+            parts = ip.split('.')
+            if all(0 <= int(p) <= 255 for p in parts):
+                valid_ips.append(ip)
+        return valid_ips
     except Exception as ex:
-        print(f"get: {url}, error: {ex}")
+        print(f"get: {url}, error: {type(ex).__name__}: {ex}")
         raise Exception
 
 
@@ -71,6 +80,24 @@ DNS_SERVER_LIST = [
     "101.101.101.101",  # Quad101
     "101.102.103.104",  # Quad101
 ]
+
+
+# 添加备用 DNS 查询方法 - 使用 DNS over HTTPS
+def get_ip_from_doh(domain: str) -> Optional[List[str]]:
+    """使用 Cloudflare DoH 查询域名 IP"""
+    try:
+        import requests
+        url = f"https://cloudflare-dns.com/dns-query?name={domain}&type=A"
+        headers = {"Accept": "application/dns-json"}
+        response = requests.get(url, headers=headers, timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            if "Answer" in data:
+                ips = [answer["data"] for answer in data["Answer"] if answer["type"] == 1]
+                return ips
+    except Exception as e:
+        print(f"{domain}: DoH 查询失败 - {e}")
+    return []
 
 
 def windows_compatibility_check():
@@ -107,21 +134,51 @@ async def get_ip(session: Any, github_url: str) -> Optional[str]:
     ip_list_web = []
     try:
         ip_list_web = get_ip_list_from_ipaddress_com(session, github_url)
+        if ip_list_web:
+            print(f"{github_url}: Web查询成功 {ip_list_web}")
     except Exception as ex:
-        pass
+        print(f"{github_url}: Web查询失败 - {ex}")
+    
     ip_list_dns = []
     try:
         ip_list_dns = await get_ip_list_from_dns(github_url, dns_server_list=DNS_SERVER_LIST)
+        if ip_list_dns:
+            print(f"{github_url}: DNS查询成功 {ip_list_dns}")
     except Exception as ex:
-        pass
-    ip_list_set = set(ip_list_web + ip_list_dns)
+        print(f"{github_url}: DNS查询失败 - {ex}")
+    
+    # 添加 DoH 查询
+    ip_list_doh = []
+    try:
+        ip_list_doh = get_ip_from_doh(github_url) or []
+        if ip_list_doh:
+            print(f"{github_url}: DoH查询成功 {ip_list_doh}")
+    except Exception as ex:
+        print(f"{github_url}: DoH查询失败 - {ex}")
+    
+    ip_list_set = set(ip_list_web + ip_list_dns + ip_list_doh)
     for discard_ip in DISCARD_LIST:
         ip_list_set.discard(discard_ip)
     ip_list = list(ip_list_set)
     ip_list.sort()
+    
+    if len(ip_list) == 0:
+        print(f"{github_url}: 所有查询方式均失败,尝试系统 DNS")
+        # 尝试使用系统默认 DNS
+        try:
+            import socket
+            system_ip = socket.gethostbyname(github_url)
+            if system_ip and system_ip not in DISCARD_LIST:
+                ip_list = [system_ip]
+                print(f"{github_url}: 系统DNS查询成功 {system_ip}")
+        except Exception as e:
+            print(f"{github_url}: 系统DNS也失败 - {e}")
+            return None
+    
     if len(ip_list) == 0:
         return None
-    print(f"{github_url}: {ip_list}")
+    
+    print(f"{github_url}: 最终IP列表 {ip_list}")
     best_ip = select_ip_from_list(ip_list)
     return best_ip
 
