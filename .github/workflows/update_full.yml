@@ -47,6 +47,11 @@ jobs:
         git diff --staged --quiet || git commit -m "Daily full IP update with ping optimization"
       continue-on-error: true
     
+    - name: Pull latest changes
+      if: steps.commit.outcome == 'success'
+      run: |
+        git pull --rebase origin main || true
+    
     - name: Push changes
       if: steps.commit.outcome == 'success'
       uses: ad-m/github-push-action@master

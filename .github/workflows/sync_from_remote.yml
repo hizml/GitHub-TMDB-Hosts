@@ -50,6 +50,9 @@ jobs:
     - name: Check on failures
       if: steps.commit.outputs.status == 'failure'
       run: exit 1
+    - name: Pull latest changes
+      run: |
+        git pull --rebase origin main || true
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
