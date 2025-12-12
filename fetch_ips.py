@@ -112,42 +112,31 @@ def windows_compatibility_check():
 async def get_ip_list_from_dns(
     domain,
     record_type="A",
-    dns_server_list=["1.2.4.8", "114.114.114.114"],
+    dns_server_list=None,
 ):
+    if dns_server_list is None:
+        dns_server_list = ["1.2.4.8", "114.114.114.114"]
+    
     # Windows 兼容性检查
     windows_compatibility_check()
 
-    # 配置 DNS 服务器
-    resolver = aiodns.DNSResolver()
-    resolver.nameservers = dns_server_list
-
     try:
+        # 配置 DNS 服务器
+        resolver = aiodns.DNSResolver(nameservers=dns_server_list)
+        
         # 执行异步查询
         result = await resolver.query(domain, record_type)
         return [answer.host for answer in result]
     except aiodns.error.DNSError as e:
         print(f"{domain}: DNS 查询失败: {e}")
         return []
+    except Exception as e:
+        print(f"{domain}: DNS 查询异常: {type(e).__name__} - {e}")
+        return []
 
 
 async def get_ip(session: Any, github_url: str) -> Optional[str]:
-    ip_list_web = []
-    try:
-        ip_list_web = get_ip_list_from_ipaddress_com(session, github_url)
-        if ip_list_web:
-            print(f"{github_url}: Web查询成功 {ip_list_web}")
-    except Exception as ex:
-        print(f"{github_url}: Web查询失败 - {ex}")
-    
-    ip_list_dns = []
-    try:
-        ip_list_dns = await get_ip_list_from_dns(github_url, dns_server_list=DNS_SERVER_LIST)
-        if ip_list_dns:
-            print(f"{github_url}: DNS查询成功 {ip_list_dns}")
-    except Exception as ex:
-        print(f"{github_url}: DNS查询失败 - {ex}")
-    
-    # 添加 DoH 查询
+    # DoH 查询 - 最可靠的方式，优先使用
     ip_list_doh = []
     try:
         ip_list_doh = get_ip_from_doh(github_url) or []
@@ -156,14 +145,33 @@ async def get_ip(session: Any, github_url: str) -> Optional[str]:
     except Exception as ex:
         print(f"{github_url}: DoH查询失败 - {ex}")
     
-    ip_list_set = set(ip_list_web + ip_list_dns + ip_list_doh)
+    # DNS 查询 - 作为补充
+    ip_list_dns = []
+    try:
+        ip_list_dns = await get_ip_list_from_dns(github_url, dns_server_list=DNS_SERVER_LIST)
+        if ip_list_dns:
+            print(f"{github_url}: DNS查询成功 {ip_list_dns}")
+    except Exception as ex:
+        print(f"{github_url}: DNS查询失败 - {ex}")
+    
+    # Web 查询 - 优先级最低（已被 403 封禁）
+    ip_list_web = []
+    # 跳过 Web 查询以提高速度，因为已被 403 封禁
+    # try:
+    #     ip_list_web = get_ip_list_from_ipaddress_com(session, github_url)
+    #     if ip_list_web:
+    #         print(f"{github_url}: Web查询成功 {ip_list_web}")
+    # except Exception as ex:
+    #     print(f"{github_url}: Web查询失败 - {ex}")
+    
+    ip_list_set = set(ip_list_doh + ip_list_dns + ip_list_web)
     for discard_ip in DISCARD_LIST:
         ip_list_set.discard(discard_ip)
     ip_list = list(ip_list_set)
     ip_list.sort()
     
     if len(ip_list) == 0:
-        print(f"{github_url}: 所有查询方式均失败,尝试系统 DNS")
+        print(f"{github_url}: DoH和DNS均失败,尝试系统 DNS")
         # 尝试使用系统默认 DNS
         try:
             import socket
