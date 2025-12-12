@@ -25,6 +25,7 @@ PING_LIST: Dict[str, int] = dict()
 
 
 def ping_cached(ip: str) -> int:
+    """带缓存的 ping 测试，返回延迟的中位数 (ms)"""
     global PING_LIST
     if ip in PING_LIST:
         return PING_LIST[ip]
@@ -33,14 +34,13 @@ def ping_cached(ip: str) -> int:
         ping_times = [ping(ip, timeout=PING_TIMEOUT_SEC).rtt_avg_ms for _ in range(3)]
         ping_times.sort()
         print(f'Ping {ip}: {ping_times} ms')
-        PING_LIST[ip] = ping_times[1] # 取中位数
+        PING_LIST[ip] = ping_times[1]  # 取中位数
         return PING_LIST[ip]
     except PermissionError:
         # macOS/Linux 需要 sudo 权限执行 ping
         print(f'⚠️  Ping {ip}: 权限不足，使用默认优先级')
         print(f'提示: 使用 "sudo python3 fetch_ips.py" 来启用 ping 测试')
-        # 返回一个默认值，表示未测试
-        PING_LIST[ip] = 999
+        PING_LIST[ip] = 999  # 返回默认值，表示未测试
         return PING_LIST[ip]
     except Exception as e:
         print(f'❌ Ping {ip}: 失败 - {e}')
@@ -49,7 +49,8 @@ def ping_cached(ip: str) -> int:
 
 
 def select_ip_from_list(ip_list: List[str]) -> Optional[str]:
-    if len(ip_list) == 0:
+    """从 IP 列表中选择最优 IP (基于 ping 延迟)"""
+    if not ip_list:
         return None
     ping_results = [(ip, ping_cached(ip)) for ip in ip_list]
     ping_results.sort(key=lambda x: x[1])
@@ -62,7 +63,7 @@ def select_ip_from_list(ip_list: List[str]) -> Optional[str]:
 
 
 # 添加备用 DNS 查询方法 - 使用 DNS over HTTPS
-def get_ip_from_doh(domain: str) -> Optional[List[str]]:
+def get_ip_from_doh(domain: str) -> List[str]:
     """使用 Cloudflare DoH 查询域名 IP"""
     try:
         import requests
@@ -97,23 +98,16 @@ async def get_ip(session: Any, github_url: str) -> Optional[str]:
     使用 Cloudflare DoH 查询，失败时回退到系统 DNS
     """
     # DoH 查询 - 最可靠的方式
-    ip_list_doh = []
-    try:
-        ip_list_doh = get_ip_from_doh(github_url) or []
-        if ip_list_doh:
-            print(f"{github_url}: DoH 查询成功 {ip_list_doh}")
-    except Exception as ex:
-        print(f"{github_url}: DoH 查询失败 - {ex}")
+    ip_list_doh = get_ip_from_doh(github_url)
+    if ip_list_doh:
+        print(f"{github_url}: DoH 查询成功 {ip_list_doh}")
 
     # 过滤无效 IP
-    ip_list_set = set(ip_list_doh)
-    for discard_ip in DISCARD_LIST:
-        ip_list_set.discard(discard_ip)
-    ip_list = list(ip_list_set)
-    ip_list.sort()
+    ip_list_set = set(ip_list_doh) - set(DISCARD_LIST)
+    ip_list = sorted(ip_list_set)
 
     # 如果 DoH 失败，尝试系统 DNS
-    if len(ip_list) == 0:
+    if not ip_list:
         print(f"{github_url}: DoH 失败，尝试系统 DNS")
         try:
             import socket
@@ -125,7 +119,7 @@ async def get_ip(session: Any, github_url: str) -> Optional[str]:
             print(f"{github_url}: 系统 DNS 也失败 - {e}")
             return None
 
-    if len(ip_list) == 0:
+    if not ip_list:
         return None
 
     print(f"{github_url}: 最终 IP 列表 {ip_list}")
@@ -134,6 +128,7 @@ async def get_ip(session: Any, github_url: str) -> Optional[str]:
 
 
 async def main() -> None:
+    """主函数：遍历所有域名，获取 IP 并写入文件"""
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print(f'{current_time} - Start script.')
 
@@ -152,17 +147,13 @@ async def main() -> None:
             if ip is None:
                 print(f"{github_url}: IP Not Found")
                 ip = "# IP Address Not Found"
-            content += ip.ljust(30) + github_url
-            global PING_LIST
-            if PING_LIST.get(ip) is not None and PING_LIST.get(ip) == PING_TIMEOUT_SEC * 1000:
-                content += "  # Timeout"
-            content += "\n"
-            content_list.append((ip, github_url,))
-        except Exception:
+            content += ip.ljust(30) + github_url + "\n"
+            content_list.append((ip, github_url))
+        except Exception as e:
+            print(f"❌ {github_url}: 处理失败 - {e}")
             continue
 
     write_hosts_content(content, content_list, force_update=force_update)
-    # print(hosts_content)
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print(f'{current_time} - End script.')
 

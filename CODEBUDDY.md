@@ -18,10 +18,10 @@ GitHub-TMDB-Hosts 是基于 GitHub520 的扩展版本，在原有 GitHub 域名�
   - 实现 hosts 模板渲染和内容去重检测
 
 - **`fetch_ips.py`**: IP 获取和优选模块 (本地手动运行)
-  - 从 ipaddress.com 和 DNS 服务器双源获取 IP 列表
+  - 使用 Cloudflare DoH (DNS over HTTPS) 查询域名 IP
+  - 失败时回退到系统 DNS
   - 使用 ping 测试选择最优 IP (取 3 次中位数)
-  - 异步 DNS 查询支持 (aiodns)
-  - Windows 平台特殊适配 (WindowsSelectorEventLoopPolicy)
+  - 异步执行提升性能 (asyncio)
 
 - **`update_ips.py`**: GitHub Actions 自动更新模块
   - 从远程 API (raw.githubusercontent.com/hizml/GitHub-TMDB-Hosts/main/hosts.json) 获取已验证的 IP 列表
@@ -31,17 +31,17 @@ GitHub-TMDB-Hosts 是基于 GitHub520 的扩展版本，在原有 GitHub 域名�
 
 ```
 本地手动流程:
-fetch_ips.py → 多源IP收集 → Ping测试优选 → common.py写入文件
+fetch_ips.py → Cloudflare DoH 查询 → Ping 测试优选 → common.py 写入文件
 
 GitHub Actions流程:
-update_ips.py → 远程API获取 → common.py写入文件 → Git提交
+update_ips.py → 远程 API 获取 → common.py 写入文件 → Git 提交
 ```
 
 ## 常用命令
 
 ### 安装依赖
 
-本地完整开发 (需要 ping 和 DNS 查询):
+本地完整开发 (需要 ping 测试和 DoH 查询):
 ```bash
 pip install -r requirements.txt
 ```
@@ -53,12 +53,17 @@ pip install -r actions_requirements.txt
 
 ### 手动获取最新 IP
 
-完整流程,包括 DNS 查询和 ping 测试:
+完整流程，包括 DoH 查询和 ping 测试:
 ```bash
 python fetch_ips.py
 ```
 
-**注意**: Windows 用户需要先安装 pycares: `pip install pycares`
+**推荐**: 使用 `sudo` 运行以启用 ping 测试:
+```bash
+sudo python3 fetch_ips.py
+```
+
+**注意**: 非 sudo 模式下，ping 将使用默认优先级 (999)，无法真正测试延迟
 
 ### 从远程 API 更新
 
@@ -71,19 +76,26 @@ python update_ips.py
 
 ### IP 选择策略
 
-1. **多源收集**: 
-   - Web 源: ipaddress.com (通过正则提取)
-   - DNS 源: 异步查询多个 DNS 服务器 (Cloudflare 1.1.1.1, Google 8.8.8.8 等)
+1. **主要来源 - Cloudflare DoH**: 
+   - 使用 DNS over HTTPS (https://cloudflare-dns.com/dns-query)
+   - 查询域名的 A 记录获取 IP 列表
+   - HTTPS 协议，更容易穿透防火墙
+   - 高可用性，单一来源通常返回多个 IP（如 CDN 域名返回 4+ 个 IP）
    
-2. **去重和过滤**:
-   - 合并两个来源后去重
+2. **备用来源 - 系统 DNS**:
+   - DoH 失败时回退到系统默认 DNS
+   - 使用 `socket.gethostbyname()` 查询
+   
+3. **去重和过滤**:
    - 过滤掉无效 IP (DISCARD_LIST: 1.0.1.1, 1.2.1.1, 127.0.0.1)
+   - 自动去重确保 IP 唯一性
 
-3. **Ping 优选**:
+4. **Ping 优选**:
    - 对每个 IP 执行 3 次 ping
    - 取中位数避免极端值
    - 带缓存避免重复测试 (PING_LIST)
    - 超时设置: 1 秒
+   - **需要 sudo 权限**才能真正执行 ping 测试
 
 ### 文件更新机制
 
@@ -116,6 +128,6 @@ timezone(timedelta(hours=8))
 ## 代码约定
 
 - 所有 Python 文件使用 UTF-8 编码
-- 重试机制: 使用 `@retry(tries=3)` 装饰器处理网络请求
-- 异步 IO: DNS 查询使用 asyncio + aiodns 提升性能
+- 异步 IO: 使用 asyncio 实现并发执行
 - 类型提示: 使用 typing 模块标注返回类型
+- 依赖最小化: 仅依赖 requests-html、pythonping、lxml_html_clean
