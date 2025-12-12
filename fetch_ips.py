@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-#   
+#
 #   Author  :   XueWeiHan
 #   E-mail  :   595666367@qq.com
 #   Date    :   2020-05-19 15:27
@@ -111,21 +111,24 @@ def windows_compatibility_check():
 
 async def get_ip_list_from_dns(
     domain,
-    record_type="A",
     dns_server_list=None,
 ):
+    """使用 aiodns 异步查询域名的 A 记录"""
     if dns_server_list is None:
         dns_server_list = ["1.2.4.8", "114.114.114.114"]
-    
+
     # Windows 兼容性检查
     windows_compatibility_check()
 
     try:
         # 配置 DNS 服务器
         resolver = aiodns.DNSResolver(nameservers=dns_server_list)
-        
-        # 执行异步查询
-        result = await resolver.query(domain, record_type)
+
+        # aiodns 3.0+ 的 query 方法: query(self, host, query_type)
+        # 注意: query_type 应该是字符串 'A', 'AAAA', 'MX' 等
+        result = await resolver.query(domain, 'A')
+
+        # A 记录返回的是 ares_query_a_result 对象列表
         return [answer.host for answer in result]
     except aiodns.error.DNSError as e:
         print(f"{domain}: DNS 查询失败: {e}")
@@ -144,7 +147,7 @@ async def get_ip(session: Any, github_url: str) -> Optional[str]:
             print(f"{github_url}: DoH查询成功 {ip_list_doh}")
     except Exception as ex:
         print(f"{github_url}: DoH查询失败 - {ex}")
-    
+
     # DNS 查询 - 作为补充
     ip_list_dns = []
     try:
@@ -153,7 +156,7 @@ async def get_ip(session: Any, github_url: str) -> Optional[str]:
             print(f"{github_url}: DNS查询成功 {ip_list_dns}")
     except Exception as ex:
         print(f"{github_url}: DNS查询失败 - {ex}")
-    
+
     # Web 查询 - 优先级最低（已被 403 封禁）
     ip_list_web = []
     # 跳过 Web 查询以提高速度，因为已被 403 封禁
@@ -163,13 +166,13 @@ async def get_ip(session: Any, github_url: str) -> Optional[str]:
     #         print(f"{github_url}: Web查询成功 {ip_list_web}")
     # except Exception as ex:
     #     print(f"{github_url}: Web查询失败 - {ex}")
-    
+
     ip_list_set = set(ip_list_doh + ip_list_dns + ip_list_web)
     for discard_ip in DISCARD_LIST:
         ip_list_set.discard(discard_ip)
     ip_list = list(ip_list_set)
     ip_list.sort()
-    
+
     if len(ip_list) == 0:
         print(f"{github_url}: DoH和DNS均失败,尝试系统 DNS")
         # 尝试使用系统默认 DNS
@@ -182,10 +185,10 @@ async def get_ip(session: Any, github_url: str) -> Optional[str]:
         except Exception as e:
             print(f"{github_url}: 系统DNS也失败 - {e}")
             return None
-    
+
     if len(ip_list) == 0:
         return None
-    
+
     print(f"{github_url}: 最终IP列表 {ip_list}")
     best_ip = select_ip_from_list(ip_list)
     return best_ip
@@ -194,12 +197,12 @@ async def get_ip(session: Any, github_url: str) -> Optional[str]:
 async def main() -> None:
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print(f'{current_time} - Start script.')
-    
+
     # 从环境变量读取 force_update 参数
     force_update = os.getenv('FORCE_UPDATE', 'false').lower() == 'true'
     if force_update:
         print('Force update mode enabled - will update even if content unchanged')
-    
+
     session = HTMLSession()
     content = ""
     content_list = []
