@@ -107,9 +107,18 @@ def get_ip_from_doh(domain: str) -> Optional[List[str]]:
             data = response.json()
             if "Answer" in data:
                 ips = [answer["data"] for answer in data["Answer"] if answer["type"] == 1]
-                return ips
+                if ips:
+                    return ips
+            # 没有 Answer 字段或 A 记录为空
+            print(f"{domain}: DoH 响应无有效 A 记录")
+        else:
+            print(f"{domain}: DoH 查询 HTTP {response.status_code}")
+    except requests.exceptions.Timeout:
+        print(f"{domain}: DoH 查询超时")
+    except requests.exceptions.RequestException as e:
+        print(f"{domain}: DoH 网络请求失败 - {type(e).__name__}")
     except Exception as e:
-        print(f"{domain}: DoH 查询失败 - {e}")
+        print(f"{domain}: DoH 查询异常 - {type(e).__name__}: {e}")
     return []
 
 
@@ -145,16 +154,19 @@ async def get_ip_list_from_dns(
         return [answer.host for answer in result]
     except TypeError as e:
         # 处理不同版本的 aiodns 参数差异
-        print(f"{domain}: DNS 查询类型错误: {e}")
+        # aiodns 1.x 版本：query 方法的签名不同
+        print(f"{domain}: DNS 查询遇到版本兼容问题，尝试旧版本 API: {e}")
         try:
+            # 对于旧版本 aiodns，nameservers 可能不是初始化参数
+            # 尝试使用默认 resolver
             resolver = aiodns.DNSResolver()
-            result = await resolver.query(domain, 'A', dns_server_list)
+            result = await resolver.query(domain, 'A')
             return [answer.host for answer in result]
         except Exception as inner_e:
-            print(f"{domain}: DNS 查询重试失败: {inner_e}")
+            print(f"{domain}: DNS 查询重试失败: {type(inner_e).__name__} - {inner_e}")
             return []
     except aiodns.error.DNSError as e:
-        print(f"{domain}: DNS 查询失败: {e}")
+        print(f"{domain}: DNS 查询失败 (域名不存在或无 A 记录): {e}")
         return []
     except Exception as e:
         print(f"{domain}: DNS 查询异常: {type(e).__name__} - {e}")
