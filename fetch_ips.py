@@ -31,11 +31,24 @@ def ping_cached(ip: str) -> int:
     global PING_LIST
     if ip in PING_LIST:
         return PING_LIST[ip]
-    ping_times = [ping(ip, timeout=PING_TIMEOUT_SEC).rtt_avg_ms for _ in range(3)]
-    ping_times.sort()
-    print(f'Ping {ip}: {ping_times} ms')
-    PING_LIST[ip] = ping_times[1] # 取中位数
-    return PING_LIST[ip]
+    
+    try:
+        ping_times = [ping(ip, timeout=PING_TIMEOUT_SEC).rtt_avg_ms for _ in range(3)]
+        ping_times.sort()
+        print(f'Ping {ip}: {ping_times} ms')
+        PING_LIST[ip] = ping_times[1] # 取中位数
+        return PING_LIST[ip]
+    except PermissionError:
+        # macOS/Linux 需要 sudo 权限执行 ping
+        print(f'⚠️  Ping {ip}: 权限不足，使用默认优先级')
+        print(f'提示: 使用 "sudo python3 fetch_ips.py" 来启用 ping 测试')
+        # 返回一个默认值，表示未测试
+        PING_LIST[ip] = 999
+        return PING_LIST[ip]
+    except Exception as e:
+        print(f'❌ Ping {ip}: 失败 - {e}')
+        PING_LIST[ip] = 999
+        return PING_LIST[ip]
 
 
 def select_ip_from_list(ip_list: List[str]) -> Optional[str]:
@@ -130,6 +143,16 @@ async def get_ip_list_from_dns(
 
         # A 记录返回的是 ares_query_a_result 对象列表
         return [answer.host for answer in result]
+    except TypeError as e:
+        # 处理不同版本的 aiodns 参数差异
+        print(f"{domain}: DNS 查询类型错误: {e}")
+        try:
+            resolver = aiodns.DNSResolver()
+            result = await resolver.query(domain, 'A', dns_server_list)
+            return [answer.host for answer in result]
+        except Exception as inner_e:
+            print(f"{domain}: DNS 查询重试失败: {inner_e}")
+            return []
     except aiodns.error.DNSError as e:
         print(f"{domain}: DNS 查询失败: {e}")
         return []
