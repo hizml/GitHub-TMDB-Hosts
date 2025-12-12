@@ -99,7 +99,7 @@
 # IP Address Not Found        api.thetvdb.com
 
 
-# Update time: 2025-12-12T10:47:13+08:00
+# Update time: 2025-12-12T11:28:34+08:00
 # Update url: https://raw.githubusercontent.com/hizml/GitHub-TMDB-Hosts/main/hosts
 # Star me: https://github.com/hizml/GitHub-TMDB-Hosts
 # Star original: https://github.com/521xueweihan/GitHub520
@@ -107,7 +107,7 @@
 
 ```
 
-该内容会自动定时更新，数据更新时间：2025-12-12T10:47:13+08:00
+该内容会自动定时更新，数据更新时间：2025-12-12T11:28:34+08:00
 
 #### 2. 修改 hosts 文件
 
