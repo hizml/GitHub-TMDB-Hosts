@@ -36,9 +36,9 @@
 
 ```bash
 # GitHub-TMDB-Hosts Start
-140.82.114.25                 alive.github.com
-140.82.113.6                  api.github.com
-140.82.112.22                 api.individual.githubcopilot.com
+140.82.113.26                 alive.github.com
+140.82.114.5                  api.github.com
+140.82.114.21                 api.individual.githubcopilot.com
 185.199.108.133               avatars.githubusercontent.com
 185.199.108.133               avatars0.githubusercontent.com
 185.199.108.133               avatars1.githubusercontent.com
@@ -47,18 +47,18 @@
 185.199.108.133               avatars4.githubusercontent.com
 185.199.108.133               avatars5.githubusercontent.com
 185.199.108.133               camo.githubusercontent.com
-140.82.114.22                 central.github.com
+140.82.113.22                 central.github.com
 185.199.108.133               cloud.githubusercontent.com
-140.82.112.10                 codeload.github.com
-140.82.114.21                 collector.github.com
+140.82.112.9                  codeload.github.com
+140.82.114.22                 collector.github.com
 185.199.108.133               desktop.githubusercontent.com
 185.199.108.133               favicons.githubusercontent.com
-140.82.114.4                  gist.github.com
-16.15.183.143                 github-cloud.s3.amazonaws.com
-16.15.207.66                  github-com.s3.amazonaws.com
-16.15.199.129                 github-production-release-asset-2e65be.s3.amazonaws.com
-16.15.252.99                  github-production-repository-file-5c1aeb.s3.amazonaws.com
-16.15.191.81                  github-production-user-asset-6210df.s3.amazonaws.com
+140.82.112.3                  gist.github.com
+16.15.207.86                  github-cloud.s3.amazonaws.com
+16.15.183.199                 github-com.s3.amazonaws.com
+16.15.183.78                  github-production-release-asset-2e65be.s3.amazonaws.com
+16.15.191.103                 github-production-repository-file-5c1aeb.s3.amazonaws.com
+16.15.191.41                  github-production-user-asset-6210df.s3.amazonaws.com
 192.0.66.2                    github.blog
 140.82.114.4                  github.com
 140.82.114.18                 github.community
@@ -67,39 +67,39 @@
 185.199.108.153               github.io
 185.199.108.133               github.map.fastly.net
 185.199.108.153               githubstatus.com
-140.82.114.25                 live.github.com
+140.82.112.25                 live.github.com
 185.199.108.133               media.githubusercontent.com
 185.199.108.133               objects.githubusercontent.com
 13.107.42.16                  pipelines.actions.githubusercontent.com
 185.199.108.133               raw.githubusercontent.com
 185.199.108.133               user-images.githubusercontent.com
 13.107.213.57                 vscode.dev
-140.82.114.21                 education.github.com
+140.82.113.21                 education.github.com
 185.199.108.133               private-user-images.githubusercontent.com
-18.160.200.103                tmdb.org
+18.238.132.18                 tmdb.org
 52.222.205.18                 api.tmdb.org
 52.222.205.108                files.tmdb.org
-108.159.227.111               themoviedb.org
+52.222.205.100                themoviedb.org
 18.161.156.100                api.themoviedb.org
 52.222.205.100                www.themoviedb.org
 108.138.167.116               auth.themoviedb.org
-169.150.236.106               image.tmdb.org
-143.244.60.196                images.tmdb.org
+185.93.1.242                  image.tmdb.org
+169.150.236.107               images.tmdb.org
 44.215.137.99                 imdb.com
-3.168.33.143                  www.imdb.com
-98.82.158.179                 secure.imdb.com
+18.154.215.49                 www.imdb.com
+44.215.137.99                 secure.imdb.com
 18.154.215.49                 s.media-imdb.com
-98.82.155.134                 us.dd.imdb.com
-3.168.33.143                  www.imdb.to
+98.82.158.179                 us.dd.imdb.com
+18.154.215.49                 www.imdb.to
 44.215.137.99                 origin-www.imdb.com
-13.225.55.146                 ia.media-imdb.com
+23.53.127.106                 ia.media-imdb.com
 52.84.217.121                 imdb-video.media-imdb.com
 151.101.1.16                  f.media-amazon.com
-3.162.172.98                  thetvdb.com
+13.225.70.80                  thetvdb.com
 13.225.228.87                 api.thetvdb.com
 
 
-# Update time: 2026-04-29T03:15:22+08:00
+# Update time: 2026-04-30T03:04:49+08:00
 # Update url: https://raw.githubusercontent.com/hizml/GitHub-TMDB-Hosts/main/hosts
 # Star me: https://github.com/hizml/GitHub-TMDB-Hosts
 # Star original: https://github.com/521xueweihan/GitHub520
@@ -107,7 +107,7 @@
 
 ```
 
-该内容会自动定时更新，数据更新时间：2026-04-29T03:15:22+08:00
+该内容会自动定时更新，数据更新时间：2026-04-30T03:04:49+08:00
 
 #### 2. 修改 hosts 文件
 
